@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import * as L from 'leaflet';
+import { Subscription } from 'rxjs';
 import { VesselService } from '../../services/vessel/vessel.service';
 
 @Component({
@@ -8,8 +9,10 @@ import { VesselService } from '../../services/vessel/vessel.service';
   templateUrl: './map.component.html',
   styleUrl: './map.component.scss'
 })
-export class MapComponent implements OnInit {
+export class MapComponent implements OnInit, OnDestroy {
   private map: L.Map | undefined;
+  private vesselLayer: L.LayerGroup | undefined;
+  private subscriptions: Subscription = new Subscription();
 
   constructor(
     private vesselService: VesselService
@@ -18,9 +21,23 @@ export class MapComponent implements OnInit {
   ngOnInit(): void {
     this.initializeMap();
 
-    this.vesselService.getGeoJsonData().subscribe((geoJsonData) => {
-      this.loadGeoJsonToMap(geoJsonData);
-    });
+    // Fetch initial vessel data
+    this.subscriptions.add(
+      this.vesselService.getGeoJsonData().subscribe((geoJsonData) => {
+        this.loadGeoJsonToMap(geoJsonData);
+      })
+    );
+
+    // Listen for real-time updates
+    this.subscriptions.add(
+      this.vesselService.listenForUpdates().subscribe((updatedGeoJsonData) => {
+        this.updateVesselsOnMap(updatedGeoJsonData);
+      })
+    );
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
   }
 
   private initializeMap(): void {
@@ -29,22 +46,30 @@ export class MapComponent implements OnInit {
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors',
     }).addTo(this.map);
+
+    this.vesselLayer = L.layerGroup().addTo(this.map);
   }
 
   private loadGeoJsonToMap(geoJsonData: any): void {
-    // Define the custom vessel icon (common for all ships)
+    this.vesselLayer?.clearLayers(); // Clear existing layers
+
     const vesselIcon = L.icon({
-      iconUrl: 'assets/icons/vessel-icon.png', // Path to the common vessel icon
-      iconSize: [12, 12], // Adjust size as needed
-      iconAnchor: [16, 32], // Anchor at the center bottom
+      iconUrl: 'assets/icons/vessel-icon.png',
+      iconSize: [12, 12],
+      iconAnchor: [16, 32],
     });
 
     L.geoJSON(geoJsonData, {
       pointToLayer: (feature, latlng) => {
-        return L.marker(latlng, { icon: vesselIcon }) // Use the common vessel icon
-          .bindPopup(this.createPopupContent(feature.properties));
+        return L.marker(latlng, { icon: vesselIcon }).bindPopup(
+          this.createPopupContent(feature.properties)
+        );
       },
-    }).addTo(this.map!);
+    }).addTo(this.vesselLayer!);
+  }
+
+  private updateVesselsOnMap(updatedGeoJsonData: any): void {
+    this.loadGeoJsonToMap(updatedGeoJsonData); // Re-load the updated data onto the map
   }
 
   private createPopupContent(properties: any): string {
