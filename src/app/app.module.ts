@@ -3,12 +3,12 @@ import { BrowserModule } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { LeafletMapComponent } from './core/components/leaflet-map/leaflet-map.component';
+import { MapComponent } from './core/components/map/map.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    LeafletMapComponent
+    MapComponent
   ],
   imports: [
     BrowserModule,
