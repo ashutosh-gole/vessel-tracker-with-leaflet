@@ -10,7 +10,6 @@ import { VesselService } from '../../services/vessel/vessel.service';
 })
 export class MapComponent implements OnInit {
   private map: L.Map | undefined;
-  private markers: { [id: number]: L.Marker } = {};
 
   constructor(
     private vesselService: VesselService
@@ -19,38 +18,52 @@ export class MapComponent implements OnInit {
   ngOnInit(): void {
     this.initializeMap();
 
-    this.vesselService.getVessels().subscribe((vessels) => {
-      console.log('Vessels:', vessels);
-      this.updateVesselMarkers(vessels);
+    this.vesselService.getGeoJsonData().subscribe((geoJsonData) => {
+      this.loadGeoJsonToMap(geoJsonData);
     });
   }
 
   private initializeMap(): void {
-    this.map = L.map('map').setView([12.9716, 77.5946], 5);
+    this.map = L.map('map').setView([18.330052459211366, 72.10280513066311], 5);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors',
     }).addTo(this.map);
   }
 
-  private updateVesselMarkers(vessels: any[]): void {
-    vessels.forEach((vessel) => {
-      if (this.markers[vessel.id]) {
-        // Update existing marker
-        this.markers[vessel.id].setLatLng([vessel.lat, vessel.lng]);
-      } else {
-        // Add new marker
-        const marker = L.marker([vessel.lat, vessel.lng], {
-          icon: L.icon({
-            iconUrl: 'assets/icons/vessel-icon.png', // Add your custom ship icon
-            iconSize: [12, 12],
-            iconAnchor: [12, 41],
-          }),
-        }).addTo(this.map!);
-        marker.bindPopup(`<b>${vessel.name}</b>`);
-        this.markers[vessel.id] = marker;
-      }
+  private loadGeoJsonToMap(geoJsonData: any): void {
+    // Define the custom vessel icon (common for all ships)
+    const vesselIcon = L.icon({
+      iconUrl: 'assets/icons/vessel-icon.png', // Path to the common vessel icon
+      iconSize: [12, 12], // Adjust size as needed
+      iconAnchor: [16, 32], // Anchor at the center bottom
     });
+
+    L.geoJSON(geoJsonData, {
+      pointToLayer: (feature, latlng) => {
+        return L.marker(latlng, { icon: vesselIcon }) // Use the common vessel icon
+          .bindPopup(this.createPopupContent(feature.properties));
+      },
+    }).addTo(this.map!);
+  }
+
+  private createPopupContent(properties: any): string {
+    return `
+      <div style="text-align: left;">
+        <h3>${properties.name}</h3>
+        <img src="${properties.image}" alt="${properties.name}" style="width: 100%; max-width: 200px; margin-bottom: 10px;">
+        <p><strong>Speed:</strong> ${properties.speed} knots</p>
+        <p><strong>Course:</strong> ${properties.course}°</p>
+        <p><strong>Destination:</strong> ${properties.destination}</p>
+        <p><strong>Description:</strong> ${properties.description}</p>
+        <p><strong>ATD:</strong> ${properties.atd}</p>
+        <p><strong>ETA:</strong> ${properties.eta}</p>
+        <p><strong>Draft:</strong> ${properties.draft}</p>
+        <p><strong>Status:</strong> ${properties.service_status}</p>
+        <p><strong>Last Update:</strong> ${properties.recieved_data_time}</p>
+        <p><strong>Progress:</strong> ${properties.progress}%</p>
+      </div>
+    `;
   }
 
 }
