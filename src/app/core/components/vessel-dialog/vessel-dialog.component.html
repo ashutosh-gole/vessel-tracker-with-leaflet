@@ -1,0 +1,47 @@
+<div class="dialog-container">
+    <!-- Close Button -->
+    <button mat-icon-button class="close-button" (click)="closeDialog()">
+        <mat-icon>close</mat-icon>
+    </button>
+
+    <!-- Vessel Image -->
+    <div class="image-container">
+        <img [src]="data.image" alt="Vessel Image" />
+    </div>
+
+    <!-- Vessel Information -->
+    <div class="details-container">
+        <h2>{{ data.name }}</h2>
+        <p class="vessel-type">{{ data.type }}</p>
+
+        <div class="info-row">
+            <p><strong>ATD:</strong> {{ data.atd }}</p>
+            <p><strong>ETA:</strong> {{ data.eta }}</p>
+        </div>
+
+        <!-- Progress Bar with Arrow -->
+        <div class="progress-container">
+            <mat-progress-bar class="progress-bar" mode="determinate" [value]="data.progress"
+                color="primary"></mat-progress-bar>
+
+            <!-- Arrow Icon Positioned Dynamically -->
+            <div class="progress-arrow" [style.left.%]="data.progress" [style.transform]="'translateX(-50%)'">
+                <mat-icon>arrow_forward</mat-icon>
+            </div>
+        </div>
+
+        <div class="status-row">
+            <p><strong>Service status:</strong> {{ data.service_status }}</p>
+            <p><strong>Speed/Course:</strong> {{ data.speed }} kn / {{ data.course }}</p>
+            <p><strong>Draft:</strong> {{ data.draft }}</p>
+        </div>
+
+        <!-- Footer -->
+        <p class="footer">
+            Received: <strong>{{ data.recieved_data_time }}</strong>
+            <br />
+            <br />
+            AIS source: Terrstrial - Maharashtra State
+        </p>
+    </div>
+</div>

@@ -1,7 +1,9 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import * as L from 'leaflet';
 import { Subscription } from 'rxjs';
 import { VesselService } from '../../services/vessel/vessel.service';
+import { VesselDialogComponent } from '../vessel-dialog/vessel-dialog.component';
 
 @Component({
   selector: 'app-map',
@@ -15,7 +17,8 @@ export class MapComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription = new Subscription();
 
   constructor(
-    private vesselService: VesselService
+    private vesselService: VesselService,
+    private dialog: MatDialog
   ) { }
 
   ngOnInit(): void {
@@ -61,9 +64,9 @@ export class MapComponent implements OnInit, OnDestroy {
 
     L.geoJSON(geoJsonData, {
       pointToLayer: (feature, latlng) => {
-        return L.marker(latlng, { icon: vesselIcon }).bindPopup(
-          this.createPopupContent(feature.properties)
-        );
+        const marker = L.marker(latlng, { icon: vesselIcon });
+        marker.on('click', () => this.openVesselDialog(feature.properties)); // Open dialog on click
+        return marker;
       },
     }).addTo(this.vesselLayer!);
   }
@@ -72,23 +75,13 @@ export class MapComponent implements OnInit, OnDestroy {
     this.loadGeoJsonToMap(updatedGeoJsonData); // Re-load the updated data onto the map
   }
 
-  private createPopupContent(properties: any): string {
-    return `
-      <div style="text-align: left;">
-        <h3>${properties.name}</h3>
-        <img src="${properties.image}" alt="${properties.name}" style="width: 100%; max-width: 200px; margin-bottom: 10px;">
-        <p><strong>Speed:</strong> ${properties.speed} knots</p>
-        <p><strong>Course:</strong> ${properties.course}°</p>
-        <p><strong>Destination:</strong> ${properties.destination}</p>
-        <p><strong>Description:</strong> ${properties.description}</p>
-        <p><strong>ATD:</strong> ${properties.atd}</p>
-        <p><strong>ETA:</strong> ${properties.eta}</p>
-        <p><strong>Draft:</strong> ${properties.draft}</p>
-        <p><strong>Status:</strong> ${properties.service_status}</p>
-        <p><strong>Last Update:</strong> ${properties.recieved_data_time}</p>
-        <p><strong>Progress:</strong> ${properties.progress}%</p>
-      </div>
-    `;
+  private openVesselDialog(properties: any): void {
+    this.dialog.open(VesselDialogComponent, {
+      width: '400px',
+      maxHeight: '600px',
+      panelClass: 'custom-dialog-container',
+      data: properties, // Pass vessel data to the dialog
+    });
   }
 
 }

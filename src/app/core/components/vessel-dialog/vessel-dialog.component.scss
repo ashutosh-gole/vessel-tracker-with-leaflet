@@ -1,0 +1,102 @@
+.dialog-container {
+    width: 400px;
+    max-height: 600px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    font-family: 'Roboto', sans-serif;
+
+    // Close Button
+    .close-button {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        color: #555;
+
+        mat-icon {
+            font-size: 24px;
+        }
+    }
+
+    // Image Section
+    .image-container {
+        text-align: center;
+        background-color: #f4f4f4;
+
+        img {
+            width: 100%;
+            max-height: 180px;
+            object-fit: cover;
+        }
+    }
+
+    // Vessel Details Section
+    .details-container {
+        padding: 15px;
+
+        h2 {
+            margin: 10px 0 5px;
+            font-size: 22px;
+            color: #333;
+        }
+
+        .vessel-type {
+            font-size: 14px;
+            color: #777;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+
+            p {
+                font-size: 14px;
+            }
+        }
+
+        // Progress Bar Styling
+        .progress-container {
+            position: relative;
+            margin: 18px;
+
+            .progress-bar {
+                height: 8px;
+                border-radius: 4px;
+            }
+
+            .progress-arrow {
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%) !important;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                color: #007bff;
+                font-size: 16px;
+            }
+        }
+
+        // Service Status Row
+        .status-row {
+            font-size: 14px;
+            margin: 15px 0;
+            line-height: 24px;
+
+            p {
+                margin: 5px 0;
+            }
+        }
+
+        // Footer
+        .footer {
+            font-size: 12px;
+            color: #555;
+
+            span {
+                color: #007bff;
+                cursor: pointer;
+            }
+        }
+    }
+}

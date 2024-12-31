@@ -1,21 +1,21 @@
+import { provideHttpClient } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { MapComponent } from './core/components/map/map.component';
-import { provideHttpClient } from '@angular/common/http';
+import { SharedModule } from './core/shared.module';
 
 @NgModule({
   declarations: [
-    AppComponent,
-    MapComponent
+    AppComponent
   ],
   imports: [
     BrowserModule,
-    AppRoutingModule
+    AppRoutingModule,
+    SharedModule
   ],
-  providers: [provideHttpClient()],
+  providers: [provideHttpClient(), provideAnimationsAsync()],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
